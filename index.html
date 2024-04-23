@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Gsneakerzz</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: black;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"] {
+            margin-top: 10px;
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        .tenis-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tenis-item img {
+            max-width: 100px;
+            max-height: 100px;
+            margin-right: 10px;
+        }
+
+        .tenis-item p {
+            margin: 5px 0;
+            flex: 1;
+        }
+
+        .tenis-item button {
+            flex-grow: 0;
+            margin-left: 10px;
+        }
+
+        .tenis-item button.borrar {
+            background-color: #d9534f;
+            color: white;
+        }
+
+        .tenis-item button.borrar:hover {
+            background-color: #c9302c;
+        }
+
+        #resultadosBusqueda .tenis-item {
+            background-color: #eef;
+        }
+
+        .negrita {
+            font-weight: bold;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock Gsneakerzz</h1>
+
+    <!-- Formulario para agregar/editar tenis -->
+    <div>
+        <h2>Agregar Tenis</h2>
+        <div class="form-group">
+            <label>URL de la Imagen:</label>
+            <input type="text" id="imagenUrl" />
+        </div>
+        <div class="form-group">
+            <label>SKU:</label>
+            <input type="text" id="sku" />
+        </div>
+        <div class="form-group">
+            <label>Precio Retail:</label>
+            <input type="number" id="precioRetail" />
+        </div>
+        <div class="form-group">
+            <label>Precio de Reventa:</label>
+            <input type="number" id="precioReventa" />
+        </div>
+        <div class="form-group">
+            <label>Talla:</label>
+            <input type="number" id="talla" />
+        </div>
+        <div class="form-group">
+            <label>Disponibilidad:</label>
+            <input type="checkbox" id="disponibilidad" />
+        </div>
+        <button onclick="agregarOEditarTenis()">Agregar/Editar Tenis</button>
+    </div>
+    
+    <!-- VisualizaciÃ³n de los tenis agregados -->
+    <div id="listaTenis">
+        <h2>Tenis Agregados</h2>
+    </div>
+
+    <!-- Buscador por talla -->
+    <div>
+        <h2>Buscar par por Talla</h2>
+        <select id="buscadorTalla">
+            <option value="">Seleccione una Talla</option>
+            <option value="22">22 cm</option>
+            <option value="22.5">22.5 cm</option>
+            <option value="23">23 cm</option>
+            <option value="23.5">23.5 cm</option>
+            <option value="24">24 cm</option>
+            <option value="24.5">24.5 cm</option>
+            <option value="25">25 cm</option>
+            <option value="25.5">25.5 cm</option>
+            <option value="26">26 cm</option>
+            <option value="26.5">26.5 cm</option>
+            <option value="27">27 cm</option>
+            <option value="27.5">27.5 cm</option>
+            <option value="28">28 cm</option>
+            <option value="28.5">28.5 cm</option>
+            <option value="29">29 cm</option>
+            <option value="29.5">29.5 cm</option>
+            <option value="30">30 cm</option>
+            <option value="30.5">30.5 cm</option>
+            <option value="31">31 cm</option>
+        </select>
+        <button onclick="buscarPorTalla()">Buscar</button>
+        <div id="resultadosBusqueda"></div>
+    </div>
+
+    <script>
+        var tenis = [];
+        var indiceEdicion = -1;
+
+        function guardarDatos() {
+            localStorage.setItem('tenis', JSON.stringify(tenis));
+        }
+
+        function cargarDatos() {
+            var datosGuardados = localStorage.getItem('tenis');
+            if (datosGuardados) {
+                tenis = JSON.parse(datosGuardados);
+                mostrarTenis();
+            }
+        }
+
+        function agregarOEditarTenis() {
+            var imagenUrl = document.getElementById('imagenUrl').value;
+            var sku = document.getElementById('sku').value;
+            var precioRetail = document.getElementById('precioRetail').value;
+            var precioReventa = document.getElementById('precioReventa').value;
+            var talla = document.getElementById('talla').value;
+            var disponibilidad = document.getElementById('disponibilidad').checked;
+
+            var tenisData = {
+                imagenUrl,
+                sku,
+                precioRetail,
+                precioReventa,
+                talla,
+                disponibilidad
+            };
+
+            if (indiceEdicion >= 0) {
+                tenis[indiceEdicion] = tenisData;
+                indiceEdicion = -1;
+            } else {
+                tenis.push(tenisData);
+            }
+
+            guardarDatos();
+            mostrarTenis();
+        }
+
+        function editarTenis(index) {
+            indiceEdicion = index;
+            var t = tenis[index];
+            document.getElementById('imagenUrl').value = t.imagenUrl;
+            document.getElementById('sku').value = t.sku;
+            document.getElementById('precioRetail').value = t.precioRetail;
+            document.getElementById('precioReventa').value = t.precioReventa;
+            document.getElementById('talla').value = t.talla;
+            document.getElementById('disponibilidad').checked = t.disponibilidad;
+        }
+
+        function borrarTenis(index) {
+            tenis.splice(index, 1);
+            guardarDatos();
+            mostrarTenis();
+        }
+
+        function mostrarTenis() {
+    var listaTenis = document.getElementById('listaTenis');
+    listaTenis.innerHTML = '';
+
+    tenis.forEach((t, index) => {
+                var ganancia = (parseFloat(t.precioReventa) - parseFloat(t.precioRetail)).toFixed(2);
+                var tenisItem = document.createElement('div');
+                tenisItem.className = 'tenis-item';
+                tenisItem.innerHTML = `
+                    <img src="${t.imagenUrl}" alt="Imagen Tenis">
+                    <p class="negrita">Talla: ${t.talla}</p> <!-- Intercambiado -->
+                    <p>Precio Retail: ${t.precioRetail}</p>
+                    <p class="negrita">Precio de Reventa: ${t.precioReventa}</p> <!-- Estilo negrita agregado -->
+                    <p>Ganancia: $${ganancia}</p>
+                    <p>SKU: ${t.sku}</p> <!-- Intercambiado -->
+                    <p>Disponibilidad: ${t.disponibilidad ? 'SÃ­' : 'No'}</p>
+                    <button onclick="editarTenis(${index})">Editar</button>
+                    <button class="borrar" onclick="borrarTenis(${index})">Borrar</button>
+                `;
+                listaTenis.appendChild(tenisItem);
+            });
+        }
+
+
+function buscarPorTalla() {
+    var tallaBuscada = document.getElementById('buscadorTalla').value;
+    var resultados = tenis.filter(t => t.talla === tallaBuscada);
+    var resultadosDiv = document.getElementById('resultadosBusqueda');
+    resultadosDiv.innerHTML = ''; // Limpiar resultados anteriores
+
+    resultados.forEach((t, index) => {
+        var ganancia = (parseFloat(t.precioReventa) - parseFloat(t.precioRetail)).toFixed(2);
+        var tenisItem = document.createElement('div');
+        tenisItem.className = 'tenis-item';
+        tenisItem.innerHTML = `
+            <img src="${t.imagenUrl}" alt="Imagen Tenis">
+            <p>SKU: ${t.sku}</p>
+            <p>Precio Retail: ${t.precioRetail}</p>
+            <p>Precio de Reventa: ${t.precioReventa}</p>
+            <p>Ganancia: $${ganancia}</p>
+            <p>Talla: ${t.talla}</p>
+            <p>Disponibilidad: ${t.disponibilidad ? 'SÃ­' : 'No'}</p>
+            <button class="borrar" onclick="borrarTenisEncontrado(${index})">Borrar</button>
+        `;
+        resultadosDiv.appendChild(tenisItem);
+    });
+}
+
+function borrarTenisEncontrado(index) {
+    var tallaBuscada = document.getElementById('buscadorTalla').value;
+    var indicesEncontrados = tenis.map((t, idx) => t.talla === tallaBuscada ? idx : -1).filter(idx => idx !== -1);
+    if (index >= 0 && index < indicesEncontrados.length) {
+        borrarTenis(indicesEncontrados[index]);
+    }
+}
+        window.onload = cargarDatos;
+    </script>
+</body>
+</html>
